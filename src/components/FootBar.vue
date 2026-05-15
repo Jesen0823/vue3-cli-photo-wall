@@ -26,13 +26,15 @@
 
     <div class="foot-right">
       <p class="title">打赏</p>
-      <div class="right-inner">
-        <img src="@/assets/images/comicfury.svg" />
-        <p>微信支付</p>
-      </div>
-      <div class="right-inner">
-        <img src="@/assets/images/comicfury.svg" />
-        <p>银联支付</p>
+      <div class="pay">
+        <div class="right-inner">
+          <img src="@/assets/images/qr-f.png" />
+          <p>微信支付</p>
+        </div>
+        <div class="right-inner">
+          <img src="@/assets/images/qr-f.png" />
+          <p>银联支付</p>
+        </div>
       </div>
     </div>
   </div>
@@ -48,38 +50,131 @@ export default {
 
 <style lang="less" scoped>
 .foot-bar {
-  widows: 100%;
-  height: 200px;
+  width: 100%;
+  min-height: 260px;
   display: flex;
-  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
   background: @gray-1;
-  padding: 24px;
+  padding: 40px 60px;
+  box-sizing: border-box;
 
   .foot-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
     .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
       .logo-img {
-        width: 60px;
-        height: 60px;
+        width: 48px;
+        height: 48px;
       }
+
       .logo-name {
         color: @gray-10;
-        font-family: 'Courier New', Courier, monospace;
         font-size: 24px;
+        font-weight: 600;
+      }
+    }
+
+    .top-p1,
+    .top-p2 {
+      font-size: 14px;
+      color: @gray-3;
+      line-height: 1.6;
+      max-width: 400px;
+    }
+
+    .top-p3 {
+      font-size: 12px;
+      color: @gray-3;
+      display: flex;
+      gap: 16px;
+      margin-top: 8px;
+    }
+  }
+
+  .link {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: @gray-10;
+    }
+
+    .line-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      a {
+        color: @gray-3;
+        font-size: 14px;
+        text-decoration: none;
+        transition: color 0.2s;
+
+        &:hover {
+          color: @primary-color;
+        }
       }
     }
   }
+
   .foot-right {
     display: flex;
-    flex-direction: row;
-    .right-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-right: 16px;
+    flex-direction: column;
+    gap: 16px;
+
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      color: @gray-10;
     }
-    img {
-      width: 200px;
-      height: 200px;
+
+    .pay {
+      display: flex;
+      gap: 24px;
+
+      .right-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+
+        img {
+          width: 120px;
+          height: 120px;
+          border-radius: 8px;
+          background: @gray-10;
+          padding: 4px;
+        }
+
+        p {
+          color: @gray-3;
+          font-size: 14px;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .foot-bar {
+    flex-direction: column;
+    gap: 32px;
+    padding: 30px 24px;
+
+    .foot-left .top-p1,
+    .foot-left .top-p2 {
+      max-width: 100%;
     }
   }
 }

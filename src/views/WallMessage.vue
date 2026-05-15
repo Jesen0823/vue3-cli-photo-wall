@@ -12,20 +12,31 @@
         </p>
       </template>
     </div>
-    <div>{{ sIndex }}</div>
+    <div class="card-list">
+      <template v-for="item in noteList" :key="item.id">
+        <note-card class="grid-item" :note="item"></note-card>
+      </template>
+    </div>
   </div>
 </template>
 
 <script>
+import NoteCard from '@/components/NoteCard.vue'
 import { wllTitleType, categorys } from '@/utils/data'
+import { noteList } from '@/../mock/index.js'
+
 export default {
   data() {
     return {
       wllTitleType,
       categorys,
       id: 0,
-      sIndex: 0
+      sIndex: 0,
+      noteList: noteList.data || []
     }
+  },
+  components: {
+    NoteCard
   },
   methods: {
     changeTab(index) {
@@ -62,6 +73,7 @@ export default {
   .label-list {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 40px;
   }
@@ -76,6 +88,61 @@ export default {
     color: @gray-2;
     border: 1px solid rgba(32, 32, 32, 1);
     border-radius: 14px;
+  }
+
+  .card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 1400px;
+    padding: 10px 20px 48px;
+    box-sizing: border-box;
+  }
+
+  .grid-item {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .card-list {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    max-width: 1100px;
+  }
+}
+
+@media (max-width: 992px) {
+  .card-list {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    max-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 36px;
+    padding-top: 32px;
+  }
+
+  .card-list {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    padding: 0 16px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 28px;
+  }
+
+  .card-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 12px;
   }
 }
 </style>
