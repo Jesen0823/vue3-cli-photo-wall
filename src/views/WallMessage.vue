@@ -18,6 +18,7 @@
       </template>
     </div>
     <div
+      v-if="!isModalVisible"
       class="addBtn"
       @click="openModal"
       :style="{
@@ -30,7 +31,15 @@
       :title="modalTitle"
       :visible="isModalVisible"
       @close-event="handleModalClose"
-    ></editor-modal>
+    >
+      <template #default="{ sColorValue, sColor }">
+        <EdittingCard
+          :id="id"
+          :sColorValue="sColorValue"
+          :sColor="sColor"
+        ></EdittingCard>
+      </template>
+    </editor-modal>
   </div>
 </template>
 
@@ -41,11 +50,12 @@ import { wllTitleType, categorys } from '@/utils/data'
 import { noteList as mockNoteList } from '@/../mock/index.js'
 import { DocumentAdd } from '@element-plus/icons-vue'
 import EditorModal from '@/components/EditorModal.vue'
+import EdittingCard from '@/components/EdittingCard.vue'
 
 const id = ref(0)
 const sIndex = ref(0)
 const noteList = ref(mockNoteList.data || [])
-const addButtom = ref(30)
+const addBottom = ref(30)
 const modalTitle = ref('写评论')
 const isModalVisible = ref(false)
 
@@ -75,9 +85,9 @@ const scrollEvent = () => {
     const scrollHeight = document.documentElement.scrollHeight
 
     if (scrollTop + clientHeight + 260 >= scrollHeight) {
-      addButtom.value = scrollTop + clientHeight + 260 - scrollHeight
+      addBottom.value = scrollTop + clientHeight + 260 - scrollHeight
     } else {
-      addButtom.value = 28
+      addBottom.value = 28
     }
   })
 }

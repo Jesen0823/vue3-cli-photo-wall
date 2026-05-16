@@ -19,6 +19,14 @@
           />
         </RadioCircleGroup>
       </div>
+
+      <div class="edit-area">
+        <slot
+          class="edit-slot"
+          :sColorValue="selectedValue"
+          :sColor="selectedColor"
+        ></slot>
+      </div>
     </div>
   </Transition>
 </template>
@@ -100,6 +108,13 @@ const closeModal = () => {
   width: 100%;
   height: 56px;
   margin-top: 16px;
+}
+
+.edit-area {
+  width: 100%;
+  .edit-slot {
+    width: 100%;
+  }
 }
 
 .modal-slide-enter-active,
