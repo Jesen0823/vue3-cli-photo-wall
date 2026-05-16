@@ -22,7 +22,7 @@
       class="addBtn"
       @click="openModal"
       :style="{
-        bottom: addButtom + 'px'
+        bottom: addBottom + 'px'
       }"
     >
       <DocumentAdd style="width: 28px; height: 28px" class="icon" />

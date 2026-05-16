@@ -11,7 +11,11 @@
           v-for="(e, index) in categorys[props.id]"
           :key="index"
           @click="selectedLabel = index"
-          :class="['label-e', { 'sel-label-e': index === selectedLabel }]"
+          class="label-e"
+          :style="{
+            background: index === selectedLabel ? '#3b73f0' : '#ebebeb',
+            color: index === selectedLabel ? '#fff' : '#202020'
+          }"
         >
           {{ e }}
         </p>
@@ -86,7 +90,9 @@ console.log(props.sColorValue, props.sColor)
       gap: 4px;
       .label-e {
         font-size: 14px;
+        color: @gray-1;
         padding: 2px 10px;
+        background: #ebebeb;
         border-radius: 20px;
         border: #ebebeb 1px solid;
         cursor: pointer;
@@ -94,10 +100,6 @@ console.log(props.sColorValue, props.sColor)
         &:hover {
           background: rgba(0, 0, 0, 0.05);
         }
-      }
-      .sel-label-e {
-        background: @primary-color;
-        border-radius: 20px;
       }
     }
   }
