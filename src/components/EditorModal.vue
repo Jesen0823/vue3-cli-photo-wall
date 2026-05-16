@@ -1,24 +1,26 @@
 <template>
-  <div class="editor-modal">
-    <div class="modal-header">
-      <p class="modal-name">{{ props.title }}</p>
-      <Close
-        style="width: 24px; height: 24px"
-        class="icon"
-        @click="closeModal"
-      />
-    </div>
-    <div class="color-panel">
-      <RadioCircleGroup v-model="selectedValue" @change="handleColorSelect">
-        <RadioCircleItem
-          v-for="(item, index) in cardColor"
-          :key="item"
-          :value="index"
-          :color="item"
+  <Transition name="modal-slide">
+    <div v-if="visible" class="editor-modal">
+      <div class="modal-header">
+        <p class="modal-name">{{ props.title }}</p>
+        <Close
+          style="width: 24px; height: 24px"
+          class="icon"
+          @click="closeModal"
         />
-      </RadioCircleGroup>
+      </div>
+      <div class="color-panel">
+        <RadioCircleGroup v-model="selectedValue" @change="handleColorSelect">
+          <RadioCircleItem
+            v-for="(item, index) in cardColor"
+            :key="item"
+            :value="index"
+            :color="item"
+          />
+        </RadioCircleGroup>
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -32,6 +34,10 @@ const props = defineProps({
     type: String,
     required: true,
     default: '标题'
+  },
+  visible: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -94,5 +100,22 @@ const closeModal = () => {
   width: 100%;
   height: 56px;
   margin-top: 16px;
+}
+
+.modal-slide-enter-active,
+.modal-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-slide-enter-from,
+.modal-slide-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.modal-slide-enter-to,
+.modal-slide-leave-from {
+  transform: translateX(0);
+  opacity: 1;
 }
 </style>

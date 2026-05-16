@@ -19,14 +19,16 @@
     </div>
     <div
       class="addBtn"
+      @click="openModal"
       :style="{
         bottom: addButtom + 'px'
       }"
     >
-      <DocumentAdd class="icon" />
+      <DocumentAdd style="width: 28px; height: 28px" class="icon" />
     </div>
     <editor-modal
       :title="modalTitle"
+      :visible="isModalVisible"
       @close-event="handleModalClose"
     ></editor-modal>
   </div>
@@ -45,11 +47,20 @@ const sIndex = ref(0)
 const noteList = ref(mockNoteList.data || [])
 const addButtom = ref(30)
 const modalTitle = ref('写评论')
+const isModalVisible = ref(false)
 
 let animationFrameId = null
 
 const changeTab = (index) => {
   sIndex.value = index
+}
+
+const openModal = () => {
+  isModalVisible.value = true
+}
+
+const handleModalClose = () => {
+  isModalVisible.value = false
 }
 
 const scrollEvent = () => {
@@ -69,10 +80,6 @@ const scrollEvent = () => {
       addButtom.value = 28
     }
   })
-}
-
-const handleModalClose = () => {
-  console.log('Modal closed.')
 }
 
 onMounted(() => {
@@ -151,12 +158,12 @@ onUnmounted(() => {
   }
 
   .addBtn {
-    width: 56px;
-    height: 56px;
+    width: 68px;
+    height: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: @gray-2;
+    background: fade(@gray-2, 88%);
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
     border-radius: 50%;
     position: fixed;
@@ -172,7 +179,6 @@ onUnmounted(() => {
     }
 
     .icon {
-      font-size: 24px;
       color: @gray-10;
     }
   }
