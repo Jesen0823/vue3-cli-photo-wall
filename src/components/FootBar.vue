@@ -51,7 +51,7 @@ export default {
 <style lang="less" scoped>
 .foot-bar {
   width: 100%;
-  min-height: 260px;
+  min-height: 230px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;

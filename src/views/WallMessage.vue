@@ -17,33 +17,74 @@
         <note-card class="grid-item" :note="item"></note-card>
       </template>
     </div>
+    <div
+      class="addBtn"
+      :style="{
+        bottom: addButtom + 'px'
+      }"
+    >
+      <DocumentAdd class="icon" />
+    </div>
+    <editor-modal
+      :title="modalTitle"
+      @close-event="handleModalClose"
+    ></editor-modal>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import NoteCard from '@/components/NoteCard.vue'
 import { wllTitleType, categorys } from '@/utils/data'
-import { noteList } from '@/../mock/index.js'
+import { noteList as mockNoteList } from '@/../mock/index.js'
+import { DocumentAdd } from '@element-plus/icons-vue'
+import EditorModal from '@/components/EditorModal.vue'
 
-export default {
-  data() {
-    return {
-      wllTitleType,
-      categorys,
-      id: 0,
-      sIndex: 0,
-      noteList: noteList.data || []
-    }
-  },
-  components: {
-    NoteCard
-  },
-  methods: {
-    changeTab(index) {
-      this.sIndex = index
-    }
-  }
+const id = ref(0)
+const sIndex = ref(0)
+const noteList = ref(mockNoteList.data || [])
+const addButtom = ref(30)
+const modalTitle = ref('写评论')
+
+let animationFrameId = null
+
+const changeTab = (index) => {
+  sIndex.value = index
 }
+
+const scrollEvent = () => {
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+
+  animationFrameId = requestAnimationFrame(() => {
+    const scrollTop =
+      document.documentElement.scrollTop || document.body.scrollTop
+    const clientHeight = document.documentElement.clientHeight
+    const scrollHeight = document.documentElement.scrollHeight
+
+    if (scrollTop + clientHeight + 260 >= scrollHeight) {
+      addButtom.value = scrollTop + clientHeight + 260 - scrollHeight
+    } else {
+      addButtom.value = 28
+    }
+  })
+}
+
+const handleModalClose = () => {
+  console.log('Modal closed.')
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', scrollEvent, true)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', scrollEvent, true)
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+})
 </script>
 
 <style lang="less" scoped>
@@ -77,17 +118,21 @@ export default {
     gap: 8px;
     margin-top: 40px;
   }
+
   .label {
     padding: 0px 14px;
     line-height: 28px;
     color: @gray-2;
+    cursor: pointer;
   }
+
   .slabel {
     padding: 0px 14px;
     line-height: 28px;
     color: @gray-2;
     border: 1px solid rgba(32, 32, 32, 1);
     border-radius: 14px;
+    cursor: pointer;
   }
 
   .card-list {
@@ -103,6 +148,33 @@ export default {
 
   .grid-item {
     width: 100%;
+  }
+
+  .addBtn {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: @gray-2;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 50%;
+    position: fixed;
+    right: 20px;
+    bottom: 28px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    z-index: 100;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .icon {
+      font-size: 24px;
+      color: @gray-10;
+    }
   }
 }
 
@@ -129,8 +201,15 @@ export default {
   .card-list {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 12px;
-    padding: 0 16px;
+    padding: 0 16px 48px;
     max-width: 100%;
+  }
+
+  .addBtn {
+    width: 48px;
+    height: 48px;
+    right: 16px;
+    bottom: 24px;
   }
 }
 
@@ -142,7 +221,7 @@ export default {
   .card-list {
     grid-template-columns: 1fr;
     gap: 12px;
-    padding: 0 12px;
+    padding: 0 12px 48px;
   }
 }
 </style>
