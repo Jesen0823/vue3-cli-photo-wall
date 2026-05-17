@@ -24,19 +24,20 @@ export default {
 .title-button {
   text-align: center;
   border: none;
+  cursor: pointer;
 }
 .max {
   min-width: 100px;
-  height: 48px;
-  border-radius: 24px;
+  height: 40px;
+  border-radius: 20px;
   padding: 0 24px;
-  line-height: 48px;
+  line-height: 40px;
 }
 
 .base {
   min-width: 80px;
   height: 36px;
-  border-radius: 20px;
+  border-radius: 18px;
   padding: 0 20px;
   line-height: 36px;
 }
@@ -44,7 +45,7 @@ export default {
 .small {
   min-width: 72px;
   height: 32px;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 0 20px;
   line-height: 32px;
 }

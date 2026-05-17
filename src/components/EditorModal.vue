@@ -69,7 +69,7 @@ const closeModal = () => {
   width: 360px;
   height: 100%;
   position: fixed;
-  padding: 20px;
+  padding: 8px 20px 0;
   right: 0;
   top: 52px;
   z-index: 1000;
@@ -77,11 +77,33 @@ const closeModal = () => {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(10px);
   box-sizing: border-box;
+  overflow-y: auto;
+
+  /* 为滚动条预留固定空间 */
+  scrollbar-gutter: stable both-edges;
+
+  /* 自定义滚动条样式，提升视觉体验 */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
 }
 
 .modal-header {
   display: flex;
-  padding: 12px 16px 12px 8px;
+  padding: 12px 16px 0 8px;
   flex-direction: row;
   justify-content: center;
   align-items: center;
@@ -106,8 +128,8 @@ const closeModal = () => {
 
 .color-panel {
   width: 100%;
-  height: 56px;
-  margin-top: 16px;
+  height: 48px;
+  margin-top: 8px;
 }
 
 .edit-area {
