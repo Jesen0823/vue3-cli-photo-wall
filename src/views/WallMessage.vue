@@ -13,8 +13,15 @@
       </template>
     </div>
     <div class="card-list">
-      <template v-for="item in noteList" :key="item.id">
-        <note-card class="grid-item" :note="item"></note-card>
+      <template v-for="(item, index) in noteList" :key="item.id">
+        <note-card
+          :class="[
+            'grid-item',
+            { 'grid-item-selected': selectedCardIndex === index }
+          ]"
+          :note="item"
+          @click="selectCard(index)"
+        ></note-card>
       </template>
     </div>
     <div
@@ -32,11 +39,12 @@
       :visible="isModalVisible"
       @close-event="handleModalClose"
     >
-      <template #default="{ sColorValue, sColor }">
+      <template #default="{ sColorValue, sColor, closeEditting }">
         <EdittingCard
           :id="id"
           :sColorValue="sColorValue"
           :sColor="sColor"
+          :closeEditting="closeEditting"
         ></EdittingCard>
       </template>
     </editor-modal>
@@ -56,13 +64,22 @@ const id = ref(0)
 const sIndex = ref(0)
 const noteList = ref(mockNoteList.data || [])
 const addBottom = ref(30)
-const modalTitle = ref('写评论')
+const modalTitle = '新建卡片'
 const isModalVisible = ref(false)
+const selectedCardIndex = ref(-1)
 
 let animationFrameId = null
 
 const changeTab = (index) => {
   sIndex.value = index
+}
+
+const selectCard = (index) => {
+  if (index !== selectedCardIndex.value) {
+    selectedCardIndex.value = index
+  } else {
+    selectedCardIndex.value = -1
+  }
 }
 
 const openModal = () => {
@@ -165,6 +182,10 @@ onUnmounted(() => {
 
   .grid-item {
     width: 100%;
+  }
+  .grid-item-selected {
+    width: 100%;
+    border: 1px solid @primary-color;
   }
 
   .addBtn {

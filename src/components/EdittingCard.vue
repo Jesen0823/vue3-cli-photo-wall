@@ -39,10 +39,18 @@
     </div>
 
     <div class="footer">
-      <TitleButton class="footer-cancel" size="max" status="primary"
+      <TitleButton
+        class="footer-cancel"
+        size="max"
+        status="primary"
+        @click="closeEditting"
         >放弃</TitleButton
       >
-      <TitleButton class="footer-submit" size="max" status="cprimary"
+      <TitleButton
+        class="footer-submit"
+        size="max"
+        status="cprimary"
+        @click="handleClickSubmit"
         >提交</TitleButton
       >
     </div>
@@ -67,12 +75,18 @@ const props = defineProps({
   sColor: {
     type: String,
     default: ''
+  },
+  closeEditting: {
+    type: Function,
+    required: true
   }
 })
 
 const selectedLabel = ref(0)
 
-console.log(props.sColorValue, props.sColor)
+const handleClickSubmit = () => {
+  // save
+}
 </script>
 
 <style lang="less" scoped>

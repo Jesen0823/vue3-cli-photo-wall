@@ -25,6 +25,7 @@
           class="edit-slot"
           :sColorValue="selectedValue"
           :sColor="selectedColor"
+          :closeEditting="closeModal"
         ></slot>
       </div>
     </div>
