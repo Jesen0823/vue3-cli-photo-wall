@@ -1,6 +1,16 @@
 <template>
   <div class="editting-card">
-    <div class="card-main" :style="{ background: props.sColor }">
+    <div class="color-panel">
+      <RadioCircleGroup v-model="selectedValue" @change="handleColorSelect">
+        <RadioCircleItem
+          v-for="(item, index) in cardColor"
+          :key="item"
+          :value="index"
+          :color="item"
+        />
+      </RadioCircleGroup>
+    </div>
+    <div class="card-main" :style="{ background: selectedColor }">
       <textarea class="tar" placeholder="请输入内容"></textarea>
       <input class="uname" type="text" placeholder="昵称" />
     </div>
@@ -43,7 +53,7 @@
         class="footer-cancel"
         size="max"
         status="primary"
-        @click="closeEditting"
+        @click="close"
         >放弃</TitleButton
       >
       <TitleButton
@@ -59,8 +69,9 @@
 
 <script setup>
 import { ref, defineProps } from 'vue'
-import { categorys } from '@/utils/data'
+import { categorys, cardColor } from '@/utils/data'
 import TitleButton from './TitleButton.vue'
+import { RadioCircleGroup, RadioCircleItem } from './radio-circle'
 
 const props = defineProps({
   id: {
@@ -68,21 +79,20 @@ const props = defineProps({
     required: true,
     default: 0
   },
-  sColorValue: {
-    type: Number,
-    default: 0
-  },
-  sColor: {
-    type: String,
-    default: ''
-  },
-  closeEditting: {
+  close: {
     type: Function,
     required: true
   }
 })
 
 const selectedLabel = ref(0)
+const selectedValue = ref(0)
+const selectedColor = ref(cardColor[0])
+
+const handleColorSelect = ({ value, color }) => {
+  selectedColor.value = color
+  selectedValue.value = value
+}
 
 const handleClickSubmit = () => {
   // save
@@ -94,6 +104,13 @@ const handleClickSubmit = () => {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: calc(100vh - 72px);
+
+  .color-panel {
+    width: 100%;
+    height: 48px;
+    margin-top: 8px;
+  }
 
   .card-main {
     display: flex;
@@ -135,6 +152,7 @@ const handleClickSubmit = () => {
         border-radius: 20px;
         border: #ebebeb 1px solid;
         cursor: pointer;
+        transition: all 0.15s ease;
 
         &:hover {
           background: rgba(0, 0, 0, 0.05);
@@ -150,25 +168,6 @@ const handleClickSubmit = () => {
     max-height: 220px;
     overflow-y: auto;
     padding: 8px 0;
-    padding-bottom: 80px;
-
-    /* 自定义滚动条样式 */
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 3px;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.2);
-      }
-    }
 
     .info {
       font-size: 12px;
@@ -177,27 +176,18 @@ const handleClickSubmit = () => {
       line-height: 1.6;
     }
   }
+
   .footer {
     display: flex;
-    width: calc(100% + 40px);
-    position: fixed;
-    padding: 12px 20px;
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-bottom: -20px;
+    margin-top: auto;
+    padding: 12px 0;
     gap: 12px;
-    bottom: 0;
-    left: auto;
-    right: 0;
     justify-content: stretch;
     align-items: center;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     z-index: 100;
     box-sizing: border-box;
-    max-width: 360px;
-    border-radius: 0;
-    box-shadow: none;
 
     .footer-submit,
     .footer-cancel {

@@ -20,14 +20,14 @@
             { 'grid-item-selected': selectedCardIndex === index }
           ]"
           :note="item"
-          @click="selectCard(index)"
+          @click="openDetailModal(item, index)"
         ></note-card>
       </template>
     </div>
     <div
       v-if="!isModalVisible"
       class="addBtn"
-      @click="openModal"
+      @click="openCreateModal"
       :style="{
         bottom: addBottom + 'px'
       }"
@@ -39,13 +39,20 @@
       :visible="isModalVisible"
       @close-event="handleModalClose"
     >
-      <template #default="{ sColorValue, sColor, closeEditting }">
+      <template #create="{ close }">
         <EdittingCard
+          v-if="modalMode === 'create'"
           :id="id"
-          :sColorValue="sColorValue"
-          :sColor="sColor"
-          :closeEditting="closeEditting"
-        ></EdittingCard>
+          :close="close"
+        />
+      </template>
+      <template #detail="{ close }">
+        <CardDetail
+          v-if="modalMode === 'detail'"
+          :id="id"
+          :close="close"
+          :objData="selectedCardData"
+        />
       </template>
     </editor-modal>
   </div>
@@ -59,14 +66,17 @@ import { noteList as mockNoteList } from '@/../mock/index.js'
 import { DocumentAdd } from '@element-plus/icons-vue'
 import EditorModal from '@/components/EditorModal.vue'
 import EdittingCard from '@/components/EdittingCard.vue'
+import CardDetail from '@/components/CardDetail.vue'
 
 const id = ref(0)
 const sIndex = ref(0)
 const noteList = ref(mockNoteList.data || [])
 const addBottom = ref(30)
-const modalTitle = '新建卡片'
+const modalTitle = ref('新建卡片')
 const isModalVisible = ref(false)
 const selectedCardIndex = ref(-1)
+const modalMode = ref('create') // 'create' | 'detail'
+const selectedCardData = ref(null)
 
 let animationFrameId = null
 
@@ -74,15 +84,19 @@ const changeTab = (index) => {
   sIndex.value = index
 }
 
-const selectCard = (index) => {
-  if (index !== selectedCardIndex.value) {
-    selectedCardIndex.value = index
-  } else {
-    selectedCardIndex.value = -1
-  }
+const openCreateModal = () => {
+  modalMode.value = 'create'
+  selectedCardData.value = null
+  selectedCardIndex.value = -1
+  modalTitle.value = '新建卡片'
+  isModalVisible.value = true
 }
 
-const openModal = () => {
+const openDetailModal = (cardData, index) => {
+  modalMode.value = 'detail'
+  selectedCardData.value = cardData
+  selectedCardIndex.value = index
+  modalTitle.value = '卡片详情'
   isModalVisible.value = true
 }
 
@@ -183,9 +197,10 @@ onUnmounted(() => {
   .grid-item {
     width: 100%;
   }
+
   .grid-item-selected {
     width: 100%;
-    border: 1px solid @primary-color;
+    border: 2px solid @primary-color;
   }
 
   .addBtn {

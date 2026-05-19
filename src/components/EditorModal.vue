@@ -9,34 +9,17 @@
           @click="closeModal"
         />
       </div>
-      <div class="color-panel">
-        <RadioCircleGroup v-model="selectedValue" @change="handleColorSelect">
-          <RadioCircleItem
-            v-for="(item, index) in cardColor"
-            :key="item"
-            :value="index"
-            :color="item"
-          />
-        </RadioCircleGroup>
-      </div>
-
-      <div class="edit-area">
-        <slot
-          class="edit-slot"
-          :sColorValue="selectedValue"
-          :sColor="selectedColor"
-          :closeEditting="closeModal"
-        ></slot>
+      <div class="content-area">
+        <slot name="create" :close="closeModal"></slot>
+        <slot name="detail" :close="closeModal"></slot>
       </div>
     </div>
   </Transition>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits } from 'vue'
 import { Close } from '@element-plus/icons-vue'
-import { RadioCircleGroup, RadioCircleItem } from './radio-circle'
-import { cardColor } from '@/utils/data'
 
 const props = defineProps({
   title: {
@@ -52,14 +35,6 @@ const props = defineProps({
 
 const emit = defineEmits(['closeEvent'])
 
-const selectedValue = ref(0)
-const selectedColor = ref(cardColor[0])
-
-const handleColorSelect = ({ value, color }) => {
-  selectedColor.value = color
-  selectedValue.value = value
-}
-
 const closeModal = () => {
   emit('closeEvent')
 }
@@ -68,7 +43,7 @@ const closeModal = () => {
 <style lang="less" scoped>
 .editor-modal {
   width: 360px;
-  height: 100%;
+  height: calc(100vh - 52px);
   position: fixed;
   padding: 8px 20px 0;
   right: 0;
@@ -79,11 +54,10 @@ const closeModal = () => {
   backdrop-filter: blur(10px);
   box-sizing: border-box;
   overflow-y: auto;
+  overflow-x: hidden;
 
-  /* 为滚动条预留固定空间 */
-  scrollbar-gutter: stable both-edges;
+  scrollbar-gutter: stable;
 
-  /* 自定义滚动条样式，提升视觉体验 */
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -127,17 +101,8 @@ const closeModal = () => {
   }
 }
 
-.color-panel {
+.content-area {
   width: 100%;
-  height: 48px;
-  margin-top: 8px;
-}
-
-.edit-area {
-  width: 100%;
-  .edit-slot {
-    width: 100%;
-  }
 }
 
 .modal-slide-enter-active,
