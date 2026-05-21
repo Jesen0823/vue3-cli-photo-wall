@@ -21,7 +21,7 @@
             { 'grid-item-selected': selectedCardIndex === index }
           ]"
           :note="item"
-          @click="openDetailModal(item, index)"
+          @click="openDetailModal(tabId, item, index)"
         ></note-card>
       </template>
     </div>
@@ -34,7 +34,7 @@
             { 'grid-item-selected': selectedCardIndex === index }
           ]"
           :photo="item"
-          @click="openDetailModal(item, index)"
+          @click="openDetailModal(tabId, item, index)"
         ></PhotoCard>
       </template>
     </div>
@@ -65,6 +65,8 @@
         />
       </template>
     </editor-modal>
+
+    <PhotoViewer :visible="isViewerVisable"></PhotoViewer>
   </div>
 </template>
 
@@ -82,6 +84,7 @@ import EditorModal from '@/components/EditorModal.vue'
 import EdittingCard from '@/components/EdittingCard.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import { useRoute } from 'vue-router'
+import PhotoViewer from '@/components/PhotoViewer.vue'
 
 const route = useRoute()
 const id = ref(0)
@@ -91,6 +94,7 @@ const photoList = mockPhotoList.data
 const addBottom = ref(30)
 const modalTitle = ref('新建卡片')
 const isModalVisible = ref(false)
+const isViewerVisable = ref(false)
 const selectedCardIndex = ref(-1)
 const modalMode = ref('create') // 'create' | 'detail'
 const selectedCardData = ref(null)
@@ -109,12 +113,14 @@ const openCreateModal = () => {
   isModalVisible.value = true
 }
 
-const openDetailModal = (cardData, index) => {
+const openDetailModal = (tabID, cardData, index) => {
+  console.log('click', tabID)
   modalMode.value = 'detail'
   selectedCardData.value = cardData
   selectedCardIndex.value = index
   modalTitle.value = '卡片详情'
   isModalVisible.value = true
+  isViewerVisable.value = true && tabID === 1
 }
 
 const tabId = computed(() => {
@@ -123,6 +129,7 @@ const tabId = computed(() => {
 
 const handleModalClose = () => {
   isModalVisible.value = false
+  isViewerVisable.value = false
 }
 
 const scrollEvent = () => {

@@ -23,7 +23,8 @@ module.exports = defineConfig({
           loader: 'ts-loader',
           exclude: /node_modules/,
           options: {
-            appendTsSuffixTo: [/\.vue$/]
+            appendTsSuffixTo: [/\.vue$/],
+            configFile: path.resolve(__dirname, 'tsconfig.json')
           }
         }
       ]

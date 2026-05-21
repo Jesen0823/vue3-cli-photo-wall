@@ -47,7 +47,7 @@ export const photoList = Mock.mock({
       'imgUrl|0-8': 0, //这里指图片
       'revoke|0-20': 0,
       'report|0-20': 0,
-      type: 0
+      type: 1
     }
   ]
 })
