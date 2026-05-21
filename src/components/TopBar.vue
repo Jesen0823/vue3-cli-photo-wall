@@ -5,8 +5,18 @@
       <p class="logo-name">相册日记</p>
     </div>
     <div class="menu">
-      <title-button size="base" status="primary">日记墙</title-button>
-      <title-button size="base" status="cprimary">照片墙</title-button>
+      <title-button
+        size="base"
+        :status="id === 0 ? 'cprimary' : 'primary'"
+        @click="tabChange(0)"
+        >日记墙</title-button
+      >
+      <title-button
+        size="base"
+        :status="id === 1 ? 'cprimary' : 'primary'"
+        @click="tabChange(1)"
+        >照片墙</title-button
+      >
     </div>
     <div class="user">
       <div class="user-head"></div>
@@ -14,16 +24,22 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import TitleButton from './TitleButton.vue'
 
-export default {
-  setup() {
-    return {}
-  },
-  components: {
-    TitleButton
-  }
+const router = useRouter()
+const route = useRoute()
+
+const id = computed(() => {
+  return parseInt(route.query.id || '0', 10)
+})
+
+const tabChange = (tabId) => {
+  router.push({
+    query: { id: tabId }
+  })
 }
 </script>
 

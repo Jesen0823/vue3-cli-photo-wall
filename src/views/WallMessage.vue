@@ -1,18 +1,19 @@
 <template>
   <div class="wall-message">
-    <p class="title">{{ wllTitleType[id].name }}</p>
-    <p class="slogan">{{ wllTitleType[id].slogan }}</p>
+    <p class="title">{{ wllTitleType[tabId].name }}</p>
+    <p class="slogan">{{ wllTitleType[tabId].slogan }}</p>
     <div class="label-list">
-      <template v-for="(item, index) in categorys[id]" :key="item">
+      <template v-for="(item, index) in categorys[tabId]" :key="item">
         <p
           :class="sIndex === index ? 'slabel' : 'label'"
-          @click="changeTab(index)"
+          @click="changeCategory(index)"
         >
           {{ item }}
         </p>
       </template>
     </div>
-    <div class="card-list">
+    <!-- 日记列表 -->
+    <div class="journal-list" v-show="tabId === 0">
       <template v-for="(item, index) in noteList" :key="item.id">
         <note-card
           :class="[
@@ -22,6 +23,19 @@
           :note="item"
           @click="openDetailModal(item, index)"
         ></note-card>
+      </template>
+    </div>
+    <!-- 照片列表 -->
+    <div class="photo-list" v-show="tabId === 1">
+      <template v-for="(item, index) in photoList" :key="item.id">
+        <PhotoCard
+          :class="[
+            'grid-item',
+            { 'grid-item-selected': selectedCardIndex === index }
+          ]"
+          :photo="item"
+          @click="openDetailModal(item, index)"
+        ></PhotoCard>
       </template>
     </div>
     <div
@@ -40,11 +54,7 @@
       @close-event="handleModalClose"
     >
       <template #create="{ close }">
-        <EdittingCard
-          v-if="modalMode === 'create'"
-          :id="id"
-          :close="close"
-        />
+        <EdittingCard v-if="modalMode === 'create'" :id="id" :close="close" />
       </template>
       <template #detail="{ close }">
         <CardDetail
@@ -59,18 +69,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import NoteCard from '@/components/NoteCard.vue'
+import PhotoCard from '@/components/PhotoCard.vue'
 import { wllTitleType, categorys } from '@/utils/data'
-import { noteList as mockNoteList } from '@/../mock/index.js'
+import {
+  noteList as mockNoteList,
+  photoList as mockPhotoList
+} from '@/../mock/index.js'
 import { DocumentAdd } from '@element-plus/icons-vue'
 import EditorModal from '@/components/EditorModal.vue'
 import EdittingCard from '@/components/EdittingCard.vue'
 import CardDetail from '@/components/CardDetail.vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const id = ref(0)
 const sIndex = ref(0)
 const noteList = ref(mockNoteList.data || [])
+const photoList = mockPhotoList.data
 const addBottom = ref(30)
 const modalTitle = ref('新建卡片')
 const isModalVisible = ref(false)
@@ -80,7 +97,7 @@ const selectedCardData = ref(null)
 
 let animationFrameId = null
 
-const changeTab = (index) => {
+const changeCategory = (index) => {
   sIndex.value = index
 }
 
@@ -99,6 +116,10 @@ const openDetailModal = (cardData, index) => {
   modalTitle.value = '卡片详情'
   isModalVisible.value = true
 }
+
+const tabId = computed(() => {
+  return parseInt(route.query.id || '0', 10)
+})
 
 const handleModalClose = () => {
   isModalVisible.value = false
@@ -146,10 +167,12 @@ onUnmounted(() => {
   align-items: center;
 
   .title {
+    font-family: 'JiaaizaoFont';
     padding-top: 48px;
     padding-bottom: 8px;
     font-size: 56px;
-    color: @gray-1;
+    color: @primary-color;
+    box-shadow: rgba(255, 255, 255, 0.3);
     text-align: center;
     font-weight: 600;
   }
@@ -183,7 +206,7 @@ onUnmounted(() => {
     cursor: pointer;
   }
 
-  .card-list {
+  .journal-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 16px;
@@ -194,8 +217,20 @@ onUnmounted(() => {
     box-sizing: border-box;
   }
 
+  .photo-list {
+    columns: 5;
+    column-gap: 12px;
+    margin-top: 30px;
+    width: 100%;
+    max-width: 1400px;
+    padding: 10px 20px 48px;
+    box-sizing: border-box;
+  }
+
   .grid-item {
     width: 100%;
+    break-inside: avoid;
+    margin-bottom: 12px;
   }
 
   .grid-item-selected {

@@ -31,7 +31,7 @@ import TitleButton from './TitleButton.vue'
 import { commentList as mockCmtList } from '@/../mock/index.js'
 import CommentItem from './CommentItem.vue'
 
-const props = defineProps({
+defineProps({
   id: {
     type: Number,
     required: true,

@@ -1,10 +1,10 @@
 export const wllTitleType = [
   {
-    name: '留言墙',
+    name: '日记记录',
     slogan: '记录时光，书写互动，收获一份友谊'
   },
   {
-    name: '相册墙',
+    name: '相册广场',
     slogan: '晒出点滴，为生命加分，分享你的美'
   }
 ]
