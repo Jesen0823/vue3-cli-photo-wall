@@ -11,8 +11,12 @@
       </RadioCircleGroup>
     </div>
     <div class="card-main" :style="{ background: selectedColor }">
-      <textarea class="tar" placeholder="请输入内容"></textarea>
-      <input class="uname" type="text" placeholder="昵称" />
+      <textarea
+        class="tar"
+        placeholder="请输入内容"
+        v-model="inputMessage"
+      ></textarea>
+      <input class="uname" type="text" placeholder="昵称" v-model="inputName" />
     </div>
     <div class="label-list">
       <h4>选择标签</h4>
@@ -68,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, defineEmits } from 'vue'
 import { categorys, cardColor } from '@/utils/data'
 import TitleButton from './TitleButton.vue'
 import { RadioCircleGroup, RadioCircleItem } from './radio-circle'
@@ -85,9 +89,13 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits(['submitNewWall'])
+
 const selectedLabel = ref(0)
 const selectedValue = ref(0)
 const selectedColor = ref(cardColor[0])
+const inputMessage = ref('')
+const inputName = ref('')
 
 const handleColorSelect = ({ value, color }) => {
   selectedColor.value = color
@@ -95,7 +103,18 @@ const handleColorSelect = ({ value, color }) => {
 }
 
 const handleClickSubmit = () => {
-  // save
+  const saveData = {
+    type: props.id,
+    message: inputMessage.value,
+    name: inputName.value,
+    userId: '0',
+    moment: new Date(),
+    label: selectedLabel.value,
+    color: selectedValue.value,
+    imgUrl: ''
+  }
+  console.log('save new:', saveData)
+  emit('submitNewWall', saveData)
 }
 </script>
 

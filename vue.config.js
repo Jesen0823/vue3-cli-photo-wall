@@ -45,7 +45,7 @@ module.exports = defineConfig({
       '^/api': {
         // target: 'http://152.136.185.210:5000',
         // target: 'http://127.0.0.1:9000',
-        target: 'http://127.0.0.1:3001',
+        target: 'http://127.0.0.1:3000',
         pathRewrite: {
           '^/api': ''
         },

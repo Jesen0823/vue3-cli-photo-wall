@@ -54,7 +54,12 @@
       @close-event="handleModalClose"
     >
       <template #create="{ close }">
-        <EdittingCard v-if="modalMode === 'create'" :id="id" :close="close" />
+        <EdittingCard
+          v-if="modalMode === 'create'"
+          :id="id"
+          :close="close"
+          @submit-new-wall="handleNewWall"
+        />
       </template>
       <template #detail="{ close }">
         <CardDetail
@@ -75,7 +80,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  computed,
+  watch,
+  getCurrentInstance
+} from 'vue'
 import NoteCard from '@/components/NoteCard.vue'
 import PhotoCard from '@/components/PhotoCard.vue'
 import { wllTitleType, categorys } from '@/utils/data'
@@ -89,7 +101,9 @@ import EdittingCard from '@/components/EdittingCard.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import { useRoute } from 'vue-router'
 import PhotoViewer from '@/components/PhotoViewer.vue'
+import request from '@/api/request'
 
+const instance = getCurrentInstance()
 const route = useRoute()
 const id = ref(0)
 const sIndex = ref(0)
@@ -104,6 +118,13 @@ const modalMode = ref('create') // 'create' | 'detail'
 const selectedCardData = ref(null)
 
 let animationFrameId = null
+
+const showAlert = (type, msg) => {
+  instance.appContext.config.globalProperties.$alertShow({
+    typeAction: type,
+    message: msg
+  })
+}
 
 const changeCategory = (index) => {
   sIndex.value = index
@@ -156,6 +177,22 @@ watch(sIndex, (newVal, oldVal) => {
     handleModalClose()
   }
 })
+
+const handleNewWall = async (data) => {
+  console.log('handleNewWall', data)
+  try {
+    const result = await request.post('/insertWall', data)
+    console.log('handleNewWall res:', result)
+    // 请求成功后的逻辑：更新列表、关闭弹窗等
+    // noteList.value.unshift(data)
+    handleModalClose()
+    showAlert('success', '提交成功~')
+  } catch (error) {
+    // 统一错误处理
+    showAlert('error', '提交失败！')
+    console.error('提交失败:', error)
+  }
+}
 
 const handleModalClose = () => {
   isModalVisible.value = false
