@@ -66,12 +66,16 @@
       </template>
     </editor-modal>
 
-    <PhotoViewer :visible="isViewerVisable"></PhotoViewer>
+    <PhotoViewer
+      :visible="isViewerVisable"
+      :photo="selectedCardData"
+      :images="getImages()"
+    ></PhotoViewer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import NoteCard from '@/components/NoteCard.vue'
 import PhotoCard from '@/components/PhotoCard.vue'
 import { wllTitleType, categorys } from '@/utils/data'
@@ -123,8 +127,34 @@ const openDetailModal = (tabID, cardData, index) => {
   isViewerVisable.value = true && tabID === 1
 }
 
+// 暂时传入模拟数据，后续服务端支持
+// 为了凑n张图片的数组imageList，n取1至5的随机数
+// 长度为n的数组imageList，存储区间[0,8]的随机数 ，而且imgeList至少包含当前selectedCardData.value.imgUrl(也是一个数字)
+// 例如：n= 5,selectedCardData.value.imgUrl=3, 此时imageList可以是： imageList = [1,2,3,5,7,8]
+const getImages = () => {
+  const currentImgUrl = selectedCardData.value?.imgUrl ?? 0
+  const totalImages = 9
+  const n = Math.floor(Math.random() * 5) + 1
+
+  const imageList = new Set([currentImgUrl])
+
+  while (imageList.size < n) {
+    const randomIndex = Math.floor(Math.random() * totalImages)
+    imageList.add(randomIndex)
+  }
+
+  console.log('imageList:', imageList)
+  return Array.from(imageList)
+}
+
 const tabId = computed(() => {
   return parseInt(route.query.id || '0', 10)
+})
+
+watch(sIndex, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    handleModalClose()
+  }
 })
 
 const handleModalClose = () => {

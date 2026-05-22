@@ -5,24 +5,28 @@
       <button class="btn-prev" @click.stop="handlePrev">
         <ArrowLeftBold class="icon" />
       </button>
-      <div class="image-wrapper" @click.stop>
-        <img 
+      <div
+        class="image-wrapper"
+        @click.stop
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+        @wheel="onWheel"
+      >
+        <img
           ref="imageRef"
-          :src="currentImage" 
-          class="photo-img" 
-          :class="{ 'scrollable': isScrollable }"
+          :src="currentImage"
+          class="photo-img"
+          :class="{ scrollable: isScrollable }"
           @load="onImageLoad"
         />
         <div v-if="isScrollable" class="scroll-hint">
-          <ChevronUp class="hint-icon" />
+          <CaretTop class="hint-icon" />
           <span>滚动查看完整图片</span>
         </div>
       </div>
       <button class="btn-next" @click.stop="handleNext">
         <ArrowRightBold class="icon" />
-      </button>
-      <button class="btn-close" @click.stop="handleClose">
-        <X class="icon" />
       </button>
       <div class="image-info">
         <span>{{ currentIndex + 1 }} / {{ totalImages }}</span>
@@ -33,7 +37,11 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
-import { ArrowLeftBold, ArrowRightBold, X, ChevronUp } from '@element-plus/icons-vue'
+import {
+  ArrowLeftBold,
+  ArrowRightBold,
+  CaretTop
+} from '@element-plus/icons-vue'
 
 export default {
   props: {
@@ -44,6 +52,10 @@ export default {
     images: {
       type: Array,
       default: () => []
+    },
+    photo: {
+      type: Object,
+      default: () => {}
     },
     initialIndex: {
       type: Number,
@@ -57,11 +69,21 @@ export default {
     const imageNaturalHeight = ref(0)
     const imageNaturalWidth = ref(0)
 
-    const totalImages = computed(() => props.images.length || 1)
+    const touchStartX = ref(0)
+    const touchStartY = ref(0)
+    const touchStartTime = ref(0)
+    const isScrolling = ref(false)
+    const horizontalThreshold = 50
+    const verticalThreshold = 50
 
+    const totalImages = computed(() => props.images.length || 1)
+    console.log('images:', props.images)
     const currentImage = computed(() => {
+      console.log('images.length:', props.images.length)
       if (props.images.length > 0) {
-        return require(`@/../static/photo-${props.images[currentIndex.value] + 1}.webp`)
+        return require(`@/../static/photo-${
+          props.images[currentIndex.value] + 1
+        }.webp`)
       }
       return require(`@/../static/photo-7.webp`)
     })
@@ -73,22 +95,20 @@ export default {
 
     const handlePrev = () => {
       if (totalImages.value > 1) {
-        currentIndex.value = currentIndex.value > 0 
-          ? currentIndex.value - 1 
-          : totalImages.value - 1
+        currentIndex.value =
+          currentIndex.value > 0
+            ? currentIndex.value - 1
+            : totalImages.value - 1
       }
     }
 
     const handleNext = () => {
       if (totalImages.value > 1) {
-        currentIndex.value = currentIndex.value < totalImages.value - 1 
-          ? currentIndex.value + 1 
-          : 0
+        currentIndex.value =
+          currentIndex.value < totalImages.value - 1
+            ? currentIndex.value + 1
+            : 0
       }
-    }
-
-    const handleClose = () => {
-      props.$emit('close')
     }
 
     const onImageLoad = () => {
@@ -99,16 +119,68 @@ export default {
       }
     }
 
-    watch(() => props.visible, (val) => {
-      if (val) {
-        currentIndex.value = props.initialIndex
+    const onTouchStart = (e) => {
+      touchStartX.value = e.touches[0].clientX
+      touchStartY.value = e.touches[0].clientY
+      touchStartTime.value = Date.now()
+      isScrolling.value = false
+    }
+
+    const onTouchMove = (e) => {
+      if (!isScrollable.value && totalImages.value <= 1) return
+
+      const currentX = e.touches[0].clientX
+      const currentY = e.touches[0].clientY
+      const deltaX = Math.abs(currentX - touchStartX.value)
+      const deltaY = Math.abs(currentY - touchStartY.value)
+
+      if (deltaY > verticalThreshold && deltaY > deltaX) {
+        isScrolling.value = true
+      }
+    }
+
+    const onTouchEnd = () => {
+      if (isScrolling.value) return
+
+      const deltaX = touchStartX.value - touchStartX.value
+      const deltaTime = Date.now() - touchStartTime.value
+
+      if (
+        deltaTime < 300 &&
+        Math.abs(deltaX) > horizontalThreshold &&
+        totalImages.value > 1
+      ) {
+        if (deltaX > 0) {
+          handleNext()
+        } else {
+          handlePrev()
+        }
+      }
+    }
+
+    const onWheel = (e) => {
+      if (isScrollable.value && imageRef.value) {
+        e.preventDefault()
+        imageRef.value.scrollTop += e.deltaY
+      }
+    }
+
+    watch(
+      () => props.visible,
+      (val) => {
+        if (val) {
+          currentIndex.value = props.initialIndex
+          imageLoaded.value = false
+        }
+      }
+    )
+
+    watch(
+      () => currentIndex.value,
+      () => {
         imageLoaded.value = false
       }
-    })
-
-    watch(() => currentIndex.value, () => {
-      imageLoaded.value = false
-    })
+    )
 
     return {
       imageRef,
@@ -118,12 +190,14 @@ export default {
       isScrollable,
       handlePrev,
       handleNext,
-      handleClose,
       onImageLoad,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
+      onWheel,
       ArrowLeftBold,
       ArrowRightBold,
-      X,
-      ChevronUp
+      CaretTop
     }
   }
 }
@@ -307,7 +381,8 @@ export default {
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
     transform: translateX(-50%) translateY(0);
   }
