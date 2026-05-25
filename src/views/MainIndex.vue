@@ -8,28 +8,28 @@
 
 <script>
 // @ is an alias to /src
-import request from '@/api/request'
 import FootBar from '@/components/FootBar.vue'
 import TopBar from '@/components/TopBar.vue'
 import WallMessage from './WallMessage.vue'
+import { useAppStore } from '@/store'
 
 export default {
   name: 'MainIndex',
+  data() {
+    return {}
+  },
   components: {
     TopBar,
     FootBar,
     WallMessage
   },
+  created() {
+    this.getUser()
+  },
   methods: {
     getUser() {
-      request
-        .post('', {
-          data: 'aaa',
-          pwd: '123'
-        })
-        .then((result) => {
-          console.log(result)
-        })
+      const store = useAppStore()
+      store.dispatch('fetchUser')
     }
   }
 }

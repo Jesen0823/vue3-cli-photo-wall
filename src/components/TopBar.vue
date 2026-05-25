@@ -37,7 +37,7 @@ const id = computed(() => {
 })
 
 const tabChange = (tabId) => {
-  if (id() === tabId) return
+  if (id.value === tabId) return
   router.push({
     query: { id: tabId }
   })

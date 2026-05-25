@@ -1,17 +1,15 @@
-import axios from 'axios'
+import service from '@/utils/axios'
 
-const request = axios.create({
-  baseURL: '/api',  // 参考vue.config.js对api的配置
-  timeout: 5000
-})
+// 创建Wall
+const insertWallApi = (param) => service.post('/insertWall', param)
 
-request.interceptors.request.use(config => {
-  // 添加 token
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+// 添加评论
+const insertCommentApi = (param) => service.post('/insertComment', param)
 
-export default request
+//点赞
+const insertFeedbackApi = (param) => service.post('/insertFeedback', param)
+
+// 获取ip
+const getUserIp = () => service.post('/signip')
+
+export { insertWallApi, insertCommentApi, insertFeedbackApi, getUserIp }

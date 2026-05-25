@@ -22,6 +22,7 @@
           ]"
           :note="item"
           @click="openDetailModal(tabId, item, index)"
+          @request-card-like="handleReqCardLike"
         ></note-card>
       </template>
     </div>
@@ -56,7 +57,7 @@
       <template #create="{ close }">
         <EdittingCard
           v-if="modalMode === 'create'"
-          :id="id"
+          :tabId="tabId"
           :close="close"
           @submit-new-wall="handleNewWall"
         />
@@ -67,6 +68,7 @@
           :id="id"
           :close="close"
           :objData="selectedCardData"
+          @submit-new-cmt="handleNewCmt"
         />
       </template>
     </editor-modal>
@@ -101,7 +103,11 @@ import EdittingCard from '@/components/EdittingCard.vue'
 import CardDetail from '@/components/CardDetail.vue'
 import { useRoute } from 'vue-router'
 import PhotoViewer from '@/components/PhotoViewer.vue'
-import request from '@/api/request'
+import {
+  insertWallApi,
+  insertCommentApi,
+  insertFeedbackApi
+} from '@/api/request'
 
 const instance = getCurrentInstance()
 const route = useRoute()
@@ -178,10 +184,12 @@ watch(sIndex, (newVal, oldVal) => {
   }
 })
 
+// 新建wall
 const handleNewWall = async (data) => {
   console.log('handleNewWall', data)
   try {
-    const result = await request.post('/insertWall', data)
+    insertCommentApi
+    const result = await insertWallApi(data)
     console.log('handleNewWall res:', result)
     // 请求成功后的逻辑：更新列表、关闭弹窗等
     // noteList.value.unshift(data)
@@ -191,6 +199,30 @@ const handleNewWall = async (data) => {
     // 统一错误处理
     showAlert('error', '提交失败！')
     console.error('提交失败:', error)
+  }
+}
+
+// 添加新评论
+const handleNewCmt = async (data) => {
+  console.log('handleNewCmt', data)
+  try {
+    const result = await insertCommentApi(data)
+    console.log('handleNewCmt res:', result)
+    // 请求成功后的逻辑：更新列表、关闭弹窗等
+    showAlert('success', '评论成功~')
+  } catch (error) {
+    // 统一错误处理
+    showAlert('error', '评论失败！')
+  }
+}
+
+// 点赞
+const handleReqCardLike = async (data) => {
+  try {
+    const result = await insertFeedbackApi(data)
+    console.log('handleReqCardLike res:', result)
+  } catch (error) {
+    console.error('点赞失败:', error)
   }
 }
 

@@ -12,7 +12,7 @@
         <button
           class="action-btn"
           :class="{ liked: isLiked }"
-          @click="toggleLike"
+          @click.stop="toggleLike"
         >
           <Star class="icon" />
           <span class="count">{{ likeCount }}</span>
@@ -41,11 +41,19 @@ export default {
       default: {}
     }
   },
-  setup() {
+  emits: ['requestCardLike'],
+  setup(props, { emit }) {
     const isLiked = ref(false)
     const likeCount = ref(20)
 
     const toggleLike = () => {
+      const param = {
+        wallId: props.note.id,
+        userId: props.note.userId,
+        type: props.note.type,
+        moment: new Date()
+      }
+      emit('requestCardLike', param)
       isLiked.value = !isLiked.value
       likeCount.value += isLiked.value ? 1 : -1
     }

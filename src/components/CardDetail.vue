@@ -6,10 +6,19 @@
     </div>
     <NoteCard class="card" :note="objData"></NoteCard>
     <div class="form">
-      <textarea class="tar" placeholder="请输入评论..."></textarea>
+      <textarea
+        class="tar"
+        placeholder="请输入评论..."
+        v-model="inpuCmt"
+      ></textarea>
       <div class="form-bottom">
-        <input class="uname" placeholder="输入签名" />
-        <TitleButton class="sub" size="small" status="cprimary"
+        <input class="uname" placeholder="输入签名" v-model="inputName" />
+        <TitleButton
+          class="sub"
+          size="small"
+          status="cprimary"
+          @click="handleClickSubmit"
+          :disabled="canSubmit"
           >提交</TitleButton
         >
       </div>
@@ -25,13 +34,14 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, defineEmits, ref, computed } from 'vue'
 import NoteCard from './NoteCard.vue'
 import TitleButton from './TitleButton.vue'
 import { commentList as mockCmtList } from '@/../mock/index.js'
 import CommentItem from './CommentItem.vue'
+import { useAppStore } from '@/store'
 
-defineProps({
+const props = defineProps({
   id: {
     type: Number,
     required: true,
@@ -46,6 +56,26 @@ defineProps({
     default: undefined
   }
 })
+const inpuCmt = ref('')
+const inputName = ref('')
+const canSubmit = computed(() => {
+  return inpuCmt.value.length === 0 || inputName.value.length === 0
+})
+
+const appStore = useAppStore()
+const emit = defineEmits(['submitNewCmt'])
+
+const handleClickSubmit = () => {
+  const param = {
+    wallId: props.objData.id,
+    userId: appStore.getters.getUserIp,
+    imgUrl: props.objData.imgUrl,
+    comment: inpuCmt.value,
+    name: inputName.value,
+    moment: new Date()
+  }
+  emit('submitNewCmt', param)
+}
 </script>
 
 <style lang="less" scoped>

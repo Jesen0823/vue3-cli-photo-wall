@@ -1,5 +1,9 @@
 <template>
-  <button :class="[size, status]" class="title-button">
+  <button
+    :class="[size, status, { disabled: disabled }]"
+    class="title-button"
+    :disabled="disabled"
+  >
     <slot></slot>
   </button>
 </template>
@@ -8,10 +12,16 @@
 export default {
   props: {
     size: {
+      type: String,
       default: 'base'
     },
     status: {
+      type: String,
       default: 'primary'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   setup() {
@@ -68,6 +78,33 @@ export default {
 
 .csecondary {
   background: @gray-10;
+  color: @gray-1;
+}
+
+.title-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+.title-button.disabled.primary {
+  background: @gray-4;
+  color: @gray-10;
+}
+
+.title-button.disabled.secondary {
+  background: @gray-5;
+  color: @gray-1;
+  border-color: @gray-5;
+}
+
+.title-button.disabled.cprimary {
+  background: @gray-4;
+  color: @gray-10;
+}
+
+.title-button.disabled.csecondary {
+  background: @gray-5;
   color: @gray-1;
 }
 </style>
