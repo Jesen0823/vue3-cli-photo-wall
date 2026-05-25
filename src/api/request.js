@@ -12,4 +12,13 @@ const insertFeedbackApi = (param) => service.post('/insertFeedback', param)
 // 获取ip
 const getUserIp = () => service.post('/signip')
 
-export { insertWallApi, insertCommentApi, insertFeedbackApi, getUserIp }
+// 获取wall列表
+const findWallPage = (param) => service.post('/findWallPage', param)
+
+export {
+  insertWallApi,
+  insertCommentApi,
+  insertFeedbackApi,
+  getUserIp,
+  findWallPage
+}

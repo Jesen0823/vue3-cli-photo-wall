@@ -139,7 +139,7 @@ const handleColorSelect = ({ value, color }) => {
 
 const handleClickSubmit = () => {
   const saveData = {
-    type: props.id,
+    type: props.tabId,
     message: inputMessage.value,
     name: inputName.value,
     userId: appStore.getters.getUserIp,

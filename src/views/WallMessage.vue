@@ -2,6 +2,7 @@
   <div class="wall-message">
     <p class="title">{{ wllTitleType[tabId].name }}</p>
     <p class="slogan">{{ wllTitleType[tabId].slogan }}</p>
+
     <div class="label-list">
       <template v-for="(item, index) in categorys[tabId]" :key="item">
         <p
@@ -12,9 +13,10 @@
         </p>
       </template>
     </div>
+
     <!-- 日记列表 -->
     <div class="journal-list" v-show="tabId === 0">
-      <template v-for="(item, index) in noteList" :key="item.id">
+      <template v-for="(item, index) in currentList" :key="item.id">
         <note-card
           :class="[
             'grid-item',
@@ -23,9 +25,10 @@
           :note="item"
           @click="openDetailModal(tabId, item, index)"
           @request-card-like="handleReqCardLike"
-        ></note-card>
+        />
       </template>
     </div>
+
     <!-- 照片列表 -->
     <div class="photo-list" v-show="tabId === 1">
       <template v-for="(item, index) in photoList" :key="item.id">
@@ -36,19 +39,29 @@
           ]"
           :photo="item"
           @click="openDetailModal(tabId, item, index)"
-        ></PhotoCard>
+        />
       </template>
     </div>
+
+    <!-- 状态展示 -->
+    <StateDisplay
+      :state="wallData.state.value"
+      :emptyText="'暂无数据'"
+      :loadingText="'加载中2...'"
+      :noMoreText="'没有更多了~'"
+      :animationData="loadingAnimation"
+      v-if="wallData.state.value !== 'normal'"
+    />
+
     <div
       v-if="!isModalVisible"
       class="addBtn"
       @click="openCreateModal"
-      :style="{
-        bottom: addBottom + 'px'
-      }"
+      :style="{ bottom: addBottom + 'px' }"
     >
       <DocumentAdd style="width: 28px; height: 28px" class="icon" />
     </div>
+
     <editor-modal
       :title="modalTitle"
       :visible="isModalVisible"
@@ -69,6 +82,7 @@
           :close="close"
           :objData="selectedCardData"
           @submit-new-cmt="handleNewCmt"
+          @req-card-like="handleReqCardLike"
         />
       </template>
     </editor-modal>
@@ -77,53 +91,55 @@
       :visible="isViewerVisable"
       :photo="selectedCardData"
       :images="getImages()"
-    ></PhotoViewer>
+    />
   </div>
 </template>
 
 <script setup>
-import {
-  ref,
-  onMounted,
-  onUnmounted,
-  computed,
-  watch,
-  getCurrentInstance
-} from 'vue'
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue'
+import { useRoute } from 'vue-router'
+import { DocumentAdd } from '@element-plus/icons-vue'
+import { useWallData } from '@/composables/useWallData'
+import { StateDisplay } from '@/components/state'
 import NoteCard from '@/components/NoteCard.vue'
 import PhotoCard from '@/components/PhotoCard.vue'
-import { wllTitleType, categorys } from '@/utils/data'
-import {
-  noteList as mockNoteList,
-  photoList as mockPhotoList
-} from '@/../mock/index.js'
-import { DocumentAdd } from '@element-plus/icons-vue'
 import EditorModal from '@/components/EditorModal.vue'
 import EdittingCard from '@/components/EdittingCard.vue'
 import CardDetail from '@/components/CardDetail.vue'
-import { useRoute } from 'vue-router'
 import PhotoViewer from '@/components/PhotoViewer.vue'
+import { wllTitleType, categorys } from '@/utils/data'
+import { photoList as mockPhotoList } from '@/../mock/index.js'
 import {
   insertWallApi,
   insertCommentApi,
-  insertFeedbackApi
+  insertFeedbackApi,
+  findWallPage
 } from '@/api/request'
+import loading from '@/assets/images/lolitte_loading.json'
+import useAppStore from '@/store'
 
 const instance = getCurrentInstance()
 const route = useRoute()
-const id = ref(0)
+const appStore = useAppStore()
+
+const tabId = computed(() => parseInt(route.query.id || '0', 10))
+
 const sIndex = ref(0)
-const noteList = ref(mockNoteList.data || [])
-const photoList = mockPhotoList.data
-const addBottom = ref(30)
-const modalTitle = ref('新建卡片')
+const selectedCardIndex = ref(-1)
+const selectedCardData = ref(null)
 const isModalVisible = ref(false)
 const isViewerVisable = ref(false)
-const selectedCardIndex = ref(-1)
-const modalMode = ref('create') // 'create' | 'detail'
-const selectedCardData = ref(null)
+const modalMode = ref('create')
+const modalTitle = ref('新建卡片')
+const addBottom = ref(30)
+const photoList = mockPhotoList.data
+const loadingAnimation = loading
 
-let animationFrameId = null
+const wallData = useWallData()
+
+const currentList = computed(() => {
+  return wallData.getCategoryCache(sIndex.value).value
+})
 
 const showAlert = (type, msg) => {
   instance.appContext.config.globalProperties.$alertShow({
@@ -132,8 +148,50 @@ const showAlert = (type, msg) => {
   })
 }
 
-const changeCategory = (index) => {
+const changeCategory = async (index) => {
+  if (sIndex.value === index) return
+
   sIndex.value = index
+  handleModalClose()
+  await wallData.switchCategory(index, fetchWallList)
+}
+
+const fetchWallList = async (categoryId, page) => {
+  try {
+    const param = {
+      type: tabId.value,
+      page: page,
+      pageSize: wallData.pageSize,
+      userId: appStore.getters.getUserIp,
+      label: categoryId
+    }
+
+    const res = await findWallPage(param)
+
+    if (page === 1) {
+      wallData.updateCategoryData(categoryId, res.message || [], false)
+    } else {
+      wallData.updateCategoryData(categoryId, res.message || [], true)
+    }
+
+    if (!res.message || res.message.length === 0) {
+      if (page === 1) {
+        wallData.setEmpty()
+      } else {
+        wallData.setNoMore()
+      }
+    } else {
+      wallData.setNormal()
+      if (res.message.length < wallData.pageSize) {
+        wallData.setNoMore()
+      } else {
+        wallData.incrementPage()
+      }
+    }
+  } catch (error) {
+    console.error('请求数据失败:', error)
+    wallData.setEmpty()
+  }
 }
 
 const openCreateModal = () => {
@@ -145,82 +203,52 @@ const openCreateModal = () => {
 }
 
 const openDetailModal = (tabID, cardData, index) => {
-  console.log('click', tabID)
   modalMode.value = 'detail'
   selectedCardData.value = cardData
   selectedCardIndex.value = index
   modalTitle.value = '卡片详情'
   isModalVisible.value = true
-  isViewerVisable.value = true && tabID === 1
+  isViewerVisable.value = tabID === 1
 }
 
-// 暂时传入模拟数据，后续服务端支持
-// 为了凑n张图片的数组imageList，n取1至5的随机数
-// 长度为n的数组imageList，存储区间[0,8]的随机数 ，而且imgeList至少包含当前selectedCardData.value.imgUrl(也是一个数字)
-// 例如：n= 5,selectedCardData.value.imgUrl=3, 此时imageList可以是： imageList = [1,2,3,5,7,8]
-const getImages = () => {
-  const currentImgUrl = selectedCardData.value?.imgUrl ?? 0
-  const totalImages = 9
-  const n = Math.floor(Math.random() * 5) + 1
-
-  const imageList = new Set([currentImgUrl])
-
-  while (imageList.size < n) {
-    const randomIndex = Math.floor(Math.random() * totalImages)
-    imageList.add(randomIndex)
-  }
-
-  console.log('imageList:', imageList)
-  return Array.from(imageList)
-}
-
-const tabId = computed(() => {
-  return parseInt(route.query.id || '0', 10)
-})
-
-watch(sIndex, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    handleModalClose()
-  }
-})
-
-// 新建wall
 const handleNewWall = async (data) => {
-  console.log('handleNewWall', data)
   try {
-    insertCommentApi
     const result = await insertWallApi(data)
-    console.log('handleNewWall res:', result)
-    // 请求成功后的逻辑：更新列表、关闭弹窗等
-    // noteList.value.unshift(data)
-    handleModalClose()
-    showAlert('success', '提交成功~')
+    console.log('handleNewWall:', result)
+    if (result.code === 200) {
+      handleModalClose()
+      showAlert('success', '提交成功~')
+      await wallData.refresh(fetchWallList)
+    } else {
+      showAlert('error', result.message)
+    }
   } catch (error) {
-    // 统一错误处理
     showAlert('error', '提交失败！')
     console.error('提交失败:', error)
   }
 }
 
-// 添加新评论
 const handleNewCmt = async (data) => {
-  console.log('handleNewCmt', data)
   try {
     const result = await insertCommentApi(data)
-    console.log('handleNewCmt res:', result)
-    // 请求成功后的逻辑：更新列表、关闭弹窗等
-    showAlert('success', '评论成功~')
+    if (result.code === 200) {
+      showAlert('success', '评论成功~')
+    } else {
+      showAlert('error', result.message)
+    }
   } catch (error) {
-    // 统一错误处理
     showAlert('error', '评论失败！')
   }
 }
 
-// 点赞
 const handleReqCardLike = async (data) => {
   try {
     const result = await insertFeedbackApi(data)
-    console.log('handleReqCardLike res:', result)
+    if (result.code === 200) {
+      showAlert('success', '点赞成功~')
+    } else {
+      showAlert('error', result.message)
+    }
   } catch (error) {
     console.error('点赞失败:', error)
   }
@@ -230,6 +258,22 @@ const handleModalClose = () => {
   isModalVisible.value = false
   isViewerVisable.value = false
 }
+
+const getImages = () => {
+  const currentImgUrl = selectedCardData.value?.imgUrl ?? 0
+  const totalImages = 9
+  const n = Math.floor(Math.random() * 5) + 1
+  const imageList = new Set([currentImgUrl])
+
+  while (imageList.size < n) {
+    const randomIndex = Math.floor(Math.random() * totalImages)
+    imageList.add(randomIndex)
+  }
+
+  return Array.from(imageList)
+}
+
+let animationFrameId = null
 
 const scrollEvent = () => {
   if (animationFrameId) {
@@ -244,14 +288,18 @@ const scrollEvent = () => {
 
     if (scrollTop + clientHeight + 260 >= scrollHeight) {
       addBottom.value = scrollTop + clientHeight + 260 - scrollHeight
+      if (wallData.state.value === 'normal') {
+        wallData.loadMore(fetchWallList)
+      }
     } else {
       addBottom.value = 28
     }
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('scroll', scrollEvent, true)
+  await wallData.switchCategory(sIndex.value, fetchWallList)
 })
 
 onUnmounted(() => {
@@ -269,8 +317,8 @@ onUnmounted(() => {
   padding-top: 52px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
+  position: relative;
 
   .title {
     font-family: 'JiaaizaoFont';
@@ -278,7 +326,6 @@ onUnmounted(() => {
     padding-bottom: 8px;
     font-size: 56px;
     color: @primary-color;
-    box-shadow: rgba(255, 255, 255, 0.3);
     text-align: center;
     font-weight: 600;
   }
@@ -297,19 +344,30 @@ onUnmounted(() => {
   }
 
   .label {
-    padding: 0px 14px;
+    padding: 0 14px;
     line-height: 28px;
     color: @gray-2;
     cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      color: @primary-color;
+    }
   }
 
   .slabel {
-    padding: 0px 14px;
+    padding: 0 14px;
     line-height: 28px;
     color: @gray-2;
-    border: 1px solid rgba(32, 32, 32, 1);
+    border: 1px solid @gray-1;
     border-radius: 14px;
     cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      border-color: @primary-color;
+      color: @primary-color;
+    }
   }
 
   .journal-list {
@@ -351,7 +409,7 @@ onUnmounted(() => {
     align-items: center;
     justify-content: center;
     background: fade(@gray-2, 88%);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
     border-radius: 50%;
     position: fixed;
     right: 20px;
@@ -362,7 +420,7 @@ onUnmounted(() => {
 
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     }
 
     .icon {
@@ -371,31 +429,10 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 1200px) {
-  .card-list {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    max-width: 1100px;
-  }
-}
-
-@media (max-width: 992px) {
-  .card-list {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    max-width: 900px;
-  }
-}
-
 @media (max-width: 768px) {
   .title {
     font-size: 36px;
     padding-top: 32px;
-  }
-
-  .card-list {
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 12px;
-    padding: 0 16px 48px;
-    max-width: 100%;
   }
 
   .addBtn {
@@ -409,12 +446,6 @@ onUnmounted(() => {
 @media (max-width: 480px) {
   .title {
     font-size: 28px;
-  }
-
-  .card-list {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 0 12px 48px;
   }
 }
 </style>

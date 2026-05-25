@@ -1,5 +1,5 @@
 <template>
-  <div class="note-card" :style="{ background: cardColor[note.imgUrl] }">
+  <div class="note-card" :style="{ background: cardColor[note.color] }">
     <div class="card-top">
       <span class="time">{{ note.moment }}</span>
       <span class="label">{{ categorys[note.type][note.label] }}</span>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { Star, ChatLineRound } from '@element-plus/icons-vue'
 import { categorys, cardColor } from '@/utils/data'
 export default {
@@ -43,8 +43,15 @@ export default {
   },
   emits: ['requestCardLike'],
   setup(props, { emit }) {
-    const isLiked = ref(false)
-    const likeCount = ref(20)
+    console.log('note:', props.note)
+
+    const isLiked = computed(() => {
+      return props.note.islike[0].count > 0
+    })
+
+    const likeCount = computed(() => {
+      return props.note.like[0].count
+    })
 
     const toggleLike = () => {
       const param = {
@@ -54,8 +61,8 @@ export default {
         moment: new Date()
       }
       emit('requestCardLike', param)
-      isLiked.value = !isLiked.value
-      likeCount.value += isLiked.value ? 1 : -1
+      //isLiked.value = !isLiked.value
+      //likeCount.value += isLiked.value ? 1 : -1
     }
 
     return {

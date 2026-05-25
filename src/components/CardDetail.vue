@@ -4,7 +4,11 @@
       <p class="top-des">该条日记有违社区规定？</p>
       <p class="top-report">去举报</p>
     </div>
-    <NoteCard class="card" :note="objData"></NoteCard>
+    <NoteCard
+      class="card"
+      :note="objData"
+      @request-card-like="handleCardLike"
+    ></NoteCard>
     <div class="form">
       <textarea
         class="tar"
@@ -63,7 +67,7 @@ const canSubmit = computed(() => {
 })
 
 const appStore = useAppStore()
-const emit = defineEmits(['submitNewCmt'])
+const emit = defineEmits(['submitNewCmt', 'reqCardLike'])
 
 const handleClickSubmit = () => {
   const param = {
@@ -75,6 +79,10 @@ const handleClickSubmit = () => {
     moment: new Date()
   }
   emit('submitNewCmt', param)
+}
+
+const handleCardLike = (param) => {
+  emit('reqCardLike', param)
 }
 </script>
 

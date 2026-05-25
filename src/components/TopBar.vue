@@ -28,6 +28,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import TitleButton from './TitleButton.vue'
+//import { submitTestData } from '@/test/testData'
 
 const router = useRouter()
 const route = useRoute()
@@ -37,7 +38,13 @@ const id = computed(() => {
 })
 
 const tabChange = (tabId) => {
-  if (id.value === tabId) return
+  if (id.value === tabId) {
+    //Test
+    //if (import.meta.env.DEV) {
+    //submitTestData()
+    //}
+    return
+  }
   router.push({
     query: { id: tabId }
   })
