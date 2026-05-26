@@ -29,24 +29,34 @@
     </div>
     <p class="cmt-title">评论 {{ objData.comment }}</p>
 
-    <div class="cmt-list">
-      <template v-for="(cmt, i) in mockCmtList.data" :key="cmt.id">
+    <div class="cmt-list" v-if="cmtStatusData">
+      <template v-for="(cmt, i) in commentList" :key="cmt.id">
         <CommentItem :comment="cmt" :index="i"></CommentItem>
       </template>
     </div>
+    <p
+      class="more-cmt"
+      :class="{ disabled: !hasMoreData }"
+      @click="loadMoreComment"
+      v-if="showMoreLoad"
+    >
+      {{ moreCmtText }}
+    </p>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, computed } from 'vue'
+import { defineProps, defineEmits, ref, computed, onMounted, watch } from 'vue'
 import NoteCard from './NoteCard.vue'
 import TitleButton from './TitleButton.vue'
-import { commentList as mockCmtList } from '@/../mock/index.js'
+// import { commentList as mockCmtList } from '@/../mock/index.js'
 import CommentItem from './CommentItem.vue'
 import { useAppStore } from '@/store'
+import { findCommentPage } from '@/api/request'
+//import { submitCmtTestData } from '@/test/testData'
 
 const props = defineProps({
-  id: {
+  tabId: {
     type: Number,
     required: true,
     default: 0
@@ -66,8 +76,34 @@ const canSubmit = computed(() => {
   return inpuCmt.value.length === 0 || inputName.value.length === 0
 })
 
+const cmtStatusData = ref(false)
+const commentList = ref([])
+const moreCmtText = ref('-- 加载更多 --')
+const showMoreLoad = ref(false)
+const hasMoreData = ref(false)
+let currentPage = 1
+const pageSize = 8
 const appStore = useAppStore()
 const emit = defineEmits(['submitNewCmt', 'reqCardLike'])
+
+onMounted(() => {
+  fetchCommentList(currentPage)
+})
+
+//卡片发生变化
+watch(
+  () => props.objData,
+  (val) => {
+    if (val) {
+      currentPage = 1
+      commentList.value = []
+      hasMoreData.value = false
+      cmtStatusData.value = false
+      showMoreLoad.value = false
+      fetchCommentList(currentPage)
+    }
+  }
+)
 
 const handleClickSubmit = () => {
   const param = {
@@ -79,10 +115,49 @@ const handleClickSubmit = () => {
     moment: new Date()
   }
   emit('submitNewCmt', param)
+  
+  //生成测试
+  //submitCmtTestData(props.objData.id)
 }
 
 const handleCardLike = (param) => {
   emit('reqCardLike', param)
+}
+
+const loadMoreComment = () => {
+  if (moreCmtText.value === '没有更多了~') return
+  fetchCommentList(currentPage)
+}
+
+// 获取评论
+const fetchCommentList = async (page) => {
+  const param = {
+    page: page,
+    pageSize: pageSize,
+    id: props.objData.id
+  }
+
+  try {
+    const res = await findCommentPage(param)
+    console.log('commentList,res:', res)
+    if (!res.message || res.message.length === 0) {
+      console.log('commentList,error:', '没有评论')
+    } else {
+      commentList.value = commentList.value.concat(res.message)
+      cmtStatusData.value = true
+      showMoreLoad.value = true
+      // 本次请求得到数据条数等于页大小，才可能有下一页
+      if (res.message.length === pageSize) {
+        currentPage++
+        hasMoreData.value = true
+      } else {
+        moreCmtText.value = '没有更多了~'
+        hasMoreData.value = false
+      }
+    }
+  } catch (error) {
+    console.log('commentList,error:', error)
+  }
 }
 </script>
 
@@ -155,6 +230,20 @@ const handleCardLike = (param) => {
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+  .more-cmt {
+    width: 100%;
+    padding: 16px 20px;
+    text-align: center;
+    color: @gray-2;
+    cursor: pointer;
+
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+      color: @gray-4;
+    }
   }
 }
 </style>

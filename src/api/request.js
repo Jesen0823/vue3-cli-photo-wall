@@ -15,10 +15,14 @@ const getUserIp = () => service.post('/signip')
 // 获取wall列表
 const findWallPage = (param) => service.post('/findWallPage', param)
 
+// 获取评论列表
+const findCommentPage = (param) => service.post('/findCommentPage', param)
+
 export {
   insertWallApi,
   insertCommentApi,
   insertFeedbackApi,
   getUserIp,
-  findWallPage
+  findWallPage,
+  findCommentPage
 }

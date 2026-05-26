@@ -78,7 +78,7 @@
       <template #detail="{ close }">
         <CardDetail
           v-if="modalMode === 'detail'"
-          :id="id"
+          :id="tabId"
           :close="close"
           :objData="selectedCardData"
           @submit-new-cmt="handleNewCmt"

@@ -19,7 +19,7 @@
         </button>
         <button class="action-btn comment-btn">
           <ChatLineRound class="icon" />
-          <span class="count">{{ note.comment }}</span>
+          <span class="count">{{ cmtCount }}</span>
         </button>
       </div>
       <span class="author">{{ note.name }}</span>
@@ -53,6 +53,10 @@ export default {
       return props.note.like[0].count
     })
 
+    const cmtCount = computed(() => {
+      return props.note.comcount[0].count
+    })
+
     const toggleLike = () => {
       const param = {
         wallId: props.note.id,
@@ -70,6 +74,7 @@ export default {
       ChatLineRound,
       isLiked,
       likeCount,
+      cmtCount,
       toggleLike,
       categorys,
       cardColor

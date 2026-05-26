@@ -9,7 +9,7 @@
         <p class="u-name">{{ comment.name }}</p>
         <p class="time">{{ comment.moment }}</p>
       </div>
-      <div class="cmt">{{ comment.content }}</div>
+      <div class="cmt">{{ comment.comment }}</div>
     </div>
   </div>
 </template>
